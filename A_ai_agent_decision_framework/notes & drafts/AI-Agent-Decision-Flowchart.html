@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200, initial-scale=1.0">
+    <title>AI Agent Decision Framework - Executive View</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0F1B2D;
+            --blue: #005EB8;
+            --sapphire: #0F52BA;
+            --eggplant: #614051;
+            --text-main: #1F2937;
+            --text-light: #64748B;
+            --bg-page: #FFFFFF;
+            --border: #CBD5E1;
+            --line-color: #94A3B8;
+
+            --outcome-stop-bg: #F1F5F9;
+            --outcome-stop-text: #475569;
+            --outcome-stop-border: #E2E8F0;
+
+            --outcome-go-bg: #EFF6FF;
+            --outcome-go-text: #1E40AF;
+            --outcome-go-border: #BFDBFE;
+
+            /* Container colors */
+            --non-agent-bg: #F8F9FA;
+            --non-agent-border: #DEE2E6;
+            --buy-bg: #DCEDC8;
+            --buy-border: #9CCC65;
+            --build-lowcode-bg: #E3F2FD;
+            --build-lowcode-border: #64B5F6;
+            --build-procode-bg: #BBDEFB;
+            --build-procode-border: #42A5F5;
+            --multi-agent-bg: #D1C4E9;
+            --multi-agent-border: #7E57C2;
+            --single-agent-bg: #EDE7F6;
+            --single-agent-border: #9575CD;
+
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            --radius: 6px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            width: 1200px;
+            margin: 0 auto;
+            padding: 16px 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- Header --- */
+        header {
+            margin-bottom: 8px;
+            border-bottom: 2px solid var(--navy);
+            padding-bottom: 4px;
+        }
+        h1 {
+            color: var(--navy);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+        .subtitle {
+            font-size: 10px;
+            color: var(--text-light);
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+        }
+
+        /* --- Grid --- */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            align-items: start;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .column:nth-child(1) {
+            background: linear-gradient(to bottom, rgba(15,27,45,0.02), rgba(15,27,45,0.01));
+        }
+
+        .column:nth-child(2) {
+            background: linear-gradient(to bottom, rgba(0,94,184,0.02), rgba(0,94,184,0.01));
+        }
+
+        .column:nth-child(3) {
+            background: linear-gradient(to bottom, rgba(30,64,175,0.02), rgba(30,64,175,0.01));
+        }
+
+        .col-header {
+            background-color: var(--navy);
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: center;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .column:not(:last-child) .col-header::after {
+            content: '';
+            position: absolute;
+            right: -18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 12px solid var(--navy);
+            z-index: 10;
+        }
+
+        /* --- Floating Node System --- */
+        .node {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Standardized Q# Badge */
+        .badge {
+            position: absolute;
+            top: -10px;      
+            left: -10px;     
+            background-color: var(--navy);
+            color: white;
+            font-size: 10px; 
+            font-weight: 700;
+            padding: 4px 0; 
+            width: 20px;    /* Fixed width for perfect circles/uniformity */
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .question-text {
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.4;
+            color: var(--text-main);
+            display: block;
+        }
+
+        /* --- Column 2 Group Refactor --- */
+        .factor-node {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 10px 8px 10px;
+            margin-bottom: 8px;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+        
+        .factor-title {
+            color: var(--navy);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            padding-left: 25px; /* Clear the floating badge */
+        }
+
+        .eval-item {
+            position: relative;
+            padding-left: 32px;
+            margin-bottom: 4px;
+        }
+        .eval-item:last-child { margin-bottom: 0; }
+
+        .sub-q-badge {
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #E2E8F0;
+            color: var(--navy);
+            font-weight: 700;
+            font-size: 9px;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        .eval-text {
+            font-size: 12px;
+            line-height: 1.3;
+            color: var(--text-main);
+            display: block;
+        }
+
+        /* --- Outcomes --- */
+        .outcome {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 12px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-top: 4px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .outcome.stop {
+            color: var(--navy);
+        }
+
+        .outcome.go {
+            color: var(--navy);
+        }
+
+        /* --- Connectors --- */
+        .arrow-line { stroke: var(--line-color); stroke-width: 1.5; fill: none; }
+        .arrow-head { fill: var(--line-color); }
+        .label-rect { fill: white; }
+        .label-text { font-size: 10px; font-weight: 700; fill: var(--text-light); text-anchor: middle; dominant-baseline: middle; }
+        
+        .connector-container {
+            width: 100%;
+            height: 40px;
+            position: relative;
+            margin-top: -8px;
+            z-index: 0;
+        }
+
+        .split-wrapper {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .split-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cross-column flow indicator */
+        .flow-next {
+            font-size: 11px;
+            font-weight: 700;
+            text-align: right;
+            padding: 6px 10px;
+            margin-top: 8px;
+            background: linear-gradient(90deg, transparent, rgba(0,94,184,0.08));
+            border-radius: 4px;
+            border-right: 3px solid var(--blue);
+        }
+
+        /* Vertical flow connector */
+        .vertical-connector {
+            display: flex;
+            justify-content: center;
+            margin: 4px 0;
+        }
+
+        /* Terminal outcome styling */
+        .terminal-outcome {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 10px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: left;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Footer Legend */
+        footer {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 2px solid var(--border);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 6px;
+            font-size: 9px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Global SVG Definitions -->
+    <svg width="0" height="0" style="position:absolute;">
+        <defs>
+            <marker id="arrow" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" class="arrow-head" />
+            </marker>
+            <marker id="arrow-blue" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L6,3 z" fill="var(--blue)" />
+            </marker>
+        </defs>
+    </svg>
+
+    <header>
+        <h1>AI Agent Decision Framework</h1>
+        <div class="subtitle">Practical framework synthesized from hands-on experience and leading AI frameworks (Microsoft, Google, AWS, Anthropic, OpenAI)</div>
+    </header>
+
+    <div class="main-grid">
+
+        <div class="column">
+            <div class="col-header">1. Qualification</div>
+
+            <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0; position: relative;">
+                <span class="badge">Q1</span>
+                <div style="font-weight:700; color:var(--navy);">TASK TYPE</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Are tasks structured, predictable, single-step, or rule-based?
+                            </div>
+                        </div>
+            </div>
+
+            <div class="connector-container">
+                <svg width="100%" height="100%">
+                    <line x1="50%" y1="0" x2="50%" y2="20" class="arrow-line" />
+                    <line x1="25%" y1="20" x2="75%" y2="20" class="arrow-line" />
+                    <line x1="25%" y1="20" x2="25%" y2="40" class="arrow-line" marker-end="url(#arrow)" />
+                    <line x1="75%" y1="20" x2="75%" y2="40" class="arrow-line" marker-end="url(#arrow)" />
+                    <!-- Labels positioned to the side of connectors -->
+                    <text x="18%" y="25" text-anchor="end" class="label-text" style="fill:var(--sapphire);">YES</text>
+                    <text x="82%" y="25" text-anchor="start" class="label-text" style="fill:var(--eggplant);">NO</text>
+                </svg>
+            </div>
+
+            <div class="split-wrapper">
+                <div class="split-col">
+                    <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0; background: var(--non-agent-bg); border-color: var(--non-agent-border);">
+                        <div style="font-weight:700; color:var(--navy);">NON-AGENT</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Code / Rules Engine / RPA<br>
+                                Classic ML / Simple RAG
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="split-col">
+                    <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0; position: relative;">
+                        <span class="badge">Q2</span>
+                        <div style="font-weight:700; color:var(--navy);">SCOPE</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Limited to content generation, summarization, or Q&A from static data?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connector-container">
+                <svg width="100%" height="100%">
+                    <line x1="75%" y1="0" x2="75%" y2="20" class="arrow-line" />
+                    <line x1="25%" y1="20" x2="75%" y2="20" class="arrow-line" />
+                    <line x1="25%" y1="20" x2="25%" y2="40" class="arrow-line" marker-end="url(#arrow)" />
+                    <line x1="75%" y1="20" x2="75%" y2="40" class="arrow-line" marker-end="url(#arrow)" />
+                    <!-- Labels positioned to the side of connectors -->
+                    <text x="18%" y="25" text-anchor="end" class="label-text" style="fill:var(--sapphire);">YES</text>
+                    <text x="82%" y="25" text-anchor="start" class="label-text" style="fill:var(--eggplant);">NO</text>
+                </svg>
+            </div>
+
+            <div class="split-wrapper">
+                <div class="split-col">
+                    <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0; background: var(--non-agent-bg); border-color: var(--non-agent-border);">
+                        <div style="font-weight:700; color:var(--navy);">NON-AGENT</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Single LLM call<br>
+                                Standard RAG
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="split-col">
+                    <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0; position: relative;">
+                        <span class="badge">Q3</span>
+                        <div style="font-weight:700; color:var(--navy);">GOVERNANCE</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Guardrails, human oversight, cost, latency, and audit logging satisfactory?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connector-container" style="height: 38px;">
+                <svg width="100%" height="100%">
+                    <line x1="75%" y1="0" x2="75%" y2="20" class="arrow-line" />
+                    <line x1="25%" y1="20" x2="75%" y2="20" class="arrow-line" />
+                    <line x1="25%" y1="20" x2="25%" y2="40" class="arrow-line" marker-end="url(#arrow)" />
+                    <line x1="75%" y1="20" x2="75%" y2="40" class="arrow-line" marker-end="url(#arrow)" />
+
+                    <!-- Labels positioned to the side of connectors -->
+                    <text x="18%" y="25" text-anchor="end" class="label-text" style="fill:var(--eggplant);">NO</text>
+                    <text x="82%" y="25" text-anchor="start" class="label-text" style="fill:var(--sapphire);">YES</text>
+                </svg>
+            </div>
+
+            <div class="split-wrapper" style="margin-top:0;">
+                <div class="split-col">
+                    <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0; background: var(--non-agent-bg); border-color: var(--non-agent-border);">
+                        <div style="font-weight:700; color:var(--navy);">WORKFLOW or NON-AGENT</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Add governance before<br>
+                                agentizing
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div class="split-col">
+                    <div class="terminal-outcome" style="padding: 8px; margin-bottom: 0;">
+                        <div style="font-weight:700; color:var(--navy);">BUILD or BUY AGENT(S)</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Evaluate build vs buy tradeoffs<br>
+                                Assess architecture needs
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="column">
+            <div class="col-header">2. Build vs Buy</div>
+
+            <div style="background:white; border:1px solid var(--border); border-radius:var(--radius); padding:10px 10px; margin-bottom:8px; box-shadow:var(--shadow); position:relative;">
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <!-- Q4 Capability -->
+                    <div style="position:relative;">
+                        <span class="badge" style="top:-22px; left:-22px;">Q4</span>
+                        <div style="font-size:11px; font-weight:700; color:var(--navy); margin-bottom:4px;">CAPABILITY FIT</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:11px; line-height:1.3; color:var(--text-main); margin-bottom:3px;">SaaS meets requirements?</div>
+                            <div style="font-size:11px; line-height:1.3; color:var(--text-main);">Standard use case?</div>
+                        </div>
+                    </div>
+
+                    <!-- Q5 Resources -->
+                    <div style="position:relative;">
+                        <span class="badge" style="top:-22px; left:-22px;">Q5</span>
+                        <div style="font-size:11px; font-weight:700; color:var(--navy); margin-bottom:4px;">RESOURCES</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:11px; line-height:1.3; color:var(--text-main); margin-bottom:3px;">Can rely on vendor for dev and maintenance?</div>
+                            <div style="font-size:11px; line-height:1.3; color:var(--text-main);">Speed to market critical?</div>
+                        </div>
+                    </div>
+
+                    <!-- Q6 Control - spans both columns -->
+                    <div style="grid-column:1/-1; position:relative;">
+                        <span class="badge" style="top:-22px; left:-22px;">Q6</span>
+                        <div style="font-size:11px; font-weight:700; color:var(--navy); margin-bottom:4px;">CONTROL NEEDS</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="display:flex; gap:20px;">
+                                <div style="font-size:11px; line-height:1.3; color:var(--text-main);">Ok with vendor  handling data?</div>
+                                <div style="font-size:11px; line-height:1.3; color:var(--text-main);">Standard guardrails sufficient?</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="connector-container" style="height:47px; margin-top:4px;">
+                <svg width="100%" height="100%">
+                    <line x1="50%" y1="0" x2="50%" y2="18" class="arrow-line" stroke-width="2" />
+                    <line x1="25%" y1="18" x2="75%" y2="18" class="arrow-line" stroke-width="2" />
+                    <line x1="25%" y1="18" x2="25%" y2="47" class="arrow-line" stroke-width="2" marker-end="url(#arrow)" />
+                    <line x1="75%" y1="18" x2="75%" y2="47" class="arrow-line" stroke-width="2" marker-end="url(#arrow)" />
+                    <!-- Labels positioned above the horizontal line -->
+                    <text x="25%" y="8" text-anchor="middle" class="label-text" style="fill:var(--sapphire); font-size:11px; font-weight:600;">YES (to all of Q4, Q5 ,Q6)</text>
+                    <text x="75%" y="8" text-anchor="middle" class="label-text" style="fill:var(--eggplant); font-size:11px; font-weight:600;">NO (to any of Q4, Q5 ,Q6)</text>
+                </svg>
+            </div>
+
+            <!-- Top Row: BUY and Q7 at same level -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; align-items:start; margin-bottom:12px;">
+                <!-- LEFT: BUY -->
+                <div>
+                    <div class="terminal-outcome" style="font-size:11px; padding:8px; background: var(--buy-bg); border-color: var(--buy-border);">
+                        <div style="font-weight:700; color:var(--navy);">BUY (SaaS AGENT)</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Fast time-to-value<br>
+                                Limited engineering
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Q7 decision (no arrow above) -->
+                <div>
+                    <div class="terminal-outcome" style="font-size:11px; padding:8px;">
+                        <span class="badge">Q7</span>
+                        <div style="font-weight:700; color:var(--navy);">LOW-CODE vs PRO-CODE</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Pre-built components suffice?<br>
+                                Rapid deployment priority?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7 Connector: Reverse T-Junction -->
+            <div style="height:45px; width:100%; margin-top:-12px; z-index:1; position:relative;">
+                <svg width="100%" height="100%" style="overflow: visible;">
+                    <!-- NO Path: Extended vertical line from Q7 bottom (y=-12 to extend upward) all the way down to BUILD (Pro-Code) -->
+                    <line x1="75%" y1="-25" x2="75%" y2="45" class="arrow-line" stroke-width="2" />
+
+                    <!-- YES Path: Vertical line from BUILD (Low-Code) top edge (shorter to create gap) -->
+                    <line x1="25%" y1="45" x2="25%" y2="15" class="arrow-line" stroke-width="2" />
+
+                    <!-- YES Path: Horizontal line at y=15 connecting to NO line -->
+                    <line x1="25%" y1="15" x2="75%" y2="15" class="arrow-line" stroke-width="2" />
+
+                    <!-- Labels positioned to the side of connectors -->
+                    <!-- YES Label: To the left of the vertical line -->
+                    <text x="18%" y="27" text-anchor="end" class="label-text" style="font-size:10px; fill:var(--sapphire);">YES</text>
+
+                    <!-- NO Label: To the right of the vertical line -->
+                    <text x="82%" y="27" text-anchor="start" class="label-text" style="font-size:10px; fill:var(--eggplant);">NO</text>
+                </svg>
+            </div>
+
+            <!-- Bottom Row: BUILD options -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                <!-- LEFT: BUILD Low-Code -->
+                <div>
+                    <div class="terminal-outcome" style="font-size:11px; padding:8px; background: var(--build-lowcode-bg); border-color: var(--build-lowcode-border);">
+                        <div style="font-weight:700; color:var(--navy);">BUILD (LOW-CODE)</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Quick Prototyping<br>
+                                Simple Automation<br>
+                                Citizen Development
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: BUILD Pro-Code -->
+                <div>
+                    <div class="terminal-outcome" style="font-size:11px; padding:8px; background: var(--build-procode-bg); border-color: var(--build-procode-border);">
+                        <div style="font-weight:700; color:var(--navy);">BUILD (PRO-CODE)</div>
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            <div style="font-size:10px; font-weight:400; margin-top:4px; line-height:1.3; color:var(--text-main);">
+                                Unique Workflows<br>
+                                Proprietary Data / Logic<br>
+                                Complex Customization
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="column" style="position: relative; min-height: 600px;">
+            <div class="col-header">3. Build Architecture</div>
+
+            <!-- Content Boxes (z-index: 2 to stay above SVG overlay) -->
+
+            <!-- Q8 -->
+            <div class="node" style="padding: 8px; margin-bottom: 30px; z-index: 2;">
+                <span class="badge">Q8</span>
+                <div style="font-size:11px; font-weight:700; color:var(--navy); margin-bottom:4px;">KEY DRIVERS</div>
+                <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                    <span class="question-text">Does the task span security or compliance boundaries?<br>Are multiple teams or departments involved?<br>Is significant scaling expected in future?</span>
+                </div>
+            </div>
+
+            <!-- Q9 (positioned on right side) -->
+            <div style="margin-left: 28%; margin-bottom: 30px; z-index: 2; position: relative;">
+                <div class="node" style="padding: 8px; margin-bottom: 0;">
+                    <span class="badge">Q9</span>
+                    <div style="font-size:11px; font-weight:700; color:var(--navy); margin-bottom:4px;">DESIGN CONSTRAINTS</div>
+                    <div style="font-size:11px; line-height:1.3; border-left:3px solid var(--blue); padding-left:8px; display:grid; grid-template-columns:1fr 1fr; gap:2px;">
+                        <div style="white-space:nowrap;">Defined agent roles?</div>
+                        <div style="white-space:nowrap;">Speed critical?</div>
+                        <div style="white-space:nowrap;">Cost-sensitive?</div>
+                        <div style="white-space:nowrap;">Large data volume?</div>
+                        <div style="white-space:nowrap;">Multiple modalities?</div>
+                        <div style="white-space:nowrap;">High complexity?</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Single Agent (Wider, positioned with minimal clearance from right connector) -->
+            <div style="margin-left: 42%; margin-bottom: 30px; z-index: 2; position: relative; max-width: 42%;">
+                <div class="node" style="padding: 8px; margin-bottom: 0;">
+                    <div style="border-left:3px solid var(--blue); padding-left:8px; text-align:center;">
+                        <span class="question-text" style="font-size:11px;">Test a Single Agent</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q10 (Wider, positioned with minimal clearance from right connector) -->
+            <div style="margin-left: 42%; margin-bottom: 40px; z-index: 2; position: relative; max-width: 42%;">
+                <div class="node" style="padding: 8px; margin-bottom: 0;">
+                    <span class="badge">Q10</span>
+                    <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                        <span class="question-text" style="text-align:center; font-size:11px;">Is the test successful?</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final outcomes: MULTI-AGENT | SINGLE AGENT -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; z-index: 2; position: relative; margin-top: -10px;">
+                <div>
+                    <div class="terminal-outcome" style="color:var(--navy); background: var(--multi-agent-bg); border-color: var(--multi-agent-border);">
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            MULTI-AGENT SYSTEM
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="terminal-outcome" style="color:var(--navy); background: var(--single-agent-bg); border-color: var(--single-agent-border);">
+                        <div style="border-left:3px solid var(--blue); padding-left:8px;">
+                            SINGLE-AGENT SYSTEM
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- FIXED SVG Overlay for Continuous Lines (Arrows Removed) -->
+            <!--
+               Layout Mapping (Approximate Y coordinates based on content height):
+               Q8 Bottom: 50px
+               Q9 Top: 130px, Bottom: 200px
+               Test Top: 230px, Bottom: 260px
+               Q10 Top: 300px, Bottom: 340px
+               Outcomes Top: 380px
+
+               X Mapping:
+               Left Outcome Center: 25%
+               Right Outcome Center: 75%
+               Q9/Q10 Area Center (Shifted Left): ~40% (28+12+half box)
+            -->
+            <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0;">
+                <!-- Only two vertical connectors: left (25%) and far right (85%) -->
+
+                <!-- Left vertical connector (25%) - Full height -->
+                <line x1="25%" y1="95" x2="25%" y2="405" class="arrow-line" stroke-width="2" />
+
+                <!-- Far right vertical connector (85%) - Full height -->
+                <line x1="85%" y1="245" x2="85%" y2="405" class="arrow-line" stroke-width="2" />
+
+                <!-- Q8 to Q9 connector (center) - extended length -->
+                <line x1="50%" y1="140" x2="50%" y2="185" class="arrow-line" stroke-width="2" />
+
+                <!-- Q9 to Test Single Agent connector - aligned to Q10 center -->
+                <line x1="62%" y1="245" x2="62%" y2="285" class="arrow-line" stroke-width="2" />
+
+                <!-- Test Single Agent to Q10 connector - aligned to Q10 center -->
+                <line x1="62%" y1="295" x2="62%" y2="335" class="arrow-line" stroke-width="2" />
+
+                <!-- Q10 to Single Agent connector - aligned to Q10 center -->
+                <line x1="62%" y1="355" x2="62%" y2="405" class="arrow-line" stroke-width="2" />
+
+                <!-- Q10 to Multi-Agent connector: horizontal line from Q10 left edge to left vertical connector -->
+                <line x1="45%" y1="350" x2="25%" y2="350" class="arrow-line" stroke-width="2" />
+
+                <!-- Labels for all connectors -->
+
+                <!-- YES label: Left vertical connector (Q8 to Multi-Agent) -->
+                <text x="18%" y="275" text-anchor="end" class="label-text" style="fill:var(--sapphire); font-size:10px;">YES</text>
+
+                <!-- NO label: Center connector (Q8 to Q9) -->
+                <text x="54%" y="150" text-anchor="start" class="label-text" style="fill:var(--eggplant); font-size:10px;">NO</text>
+
+                <!-- YES label: Far right connector (Q9 to Single Agent) -->
+                <text x="89%" y="325" text-anchor="start" class="label-text" style="fill:var(--sapphire); font-size:10px;">YES</text>
+
+                <!-- NO label: Q9 to Test Single Agent connector -->
+                <text x="66%" y="267" text-anchor="end" class="label-text" style="fill:var(--eggplant); font-size:10px;">NO</text>
+
+                <!-- YES label: Q10 to Single Agent connector -->
+                <text x="66%" y="387" text-anchor="start" class="label-text" style="fill:var(--sapphire); font-size:10px;">YES</text>
+
+                <!-- NO label: Horizontal connector (Q10 to Multi-Agent) -->
+                <text x="33%" y="340" text-anchor="middle" class="label-text" style="fill:var(--eggplant); font-size:10px;">NO</text>
+
+            </svg>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-note">
+            Framework synthesized from Microsoft, Google Cloud, AWS, Anthropic, and OpenAI AI agent decision methodologies.
+        </div>
+    </footer>
+</body>
+</html>
